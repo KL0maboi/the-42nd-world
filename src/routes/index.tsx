@@ -23,7 +23,7 @@ function Home() {
     <main className="flex flex-col justify-center items-center w-screen h-screen">
       <Label className="m-4 text-xl">Welcome</Label>
       <Input
-        className="w-sm h-12"
+        className="w-sm h-12 select-none"
         onChange={(e) => handleText(e)}
         placeholder="Enter Party Code"
       />
