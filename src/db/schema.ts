@@ -3,12 +3,12 @@ import { integer, pgTable, primaryKey, text, uuid } from 'drizzle-orm/pg-core';
 
 export const UserSchema = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name'),
+  name: text('name').notNull(),
 });
 
 export const RoomSchema = pgTable('rooms', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name'),
+  name: text('name').notNull(),
   maxPlayerCount: integer('max_player_count'),
   playerCount: integer('player_count').default(1),
 });
