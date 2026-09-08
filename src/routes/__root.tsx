@@ -1,42 +1,45 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
+import {
+  HeadContent,
+  Scripts,
+  createRootRoute,
+  useRouter,
+} from '@tanstack/react-router';
 
 import appCss from '../styles.css?url';
-import { createClientOnlyFn, createServerFn } from '@tanstack/react-start';
+import { createServerFn } from '@tanstack/react-start';
 import z from 'zod';
 import { db } from '#/db';
 import { UserSchema } from '#/db/schema';
 import { eq } from 'drizzle-orm';
 import { useEffect } from 'react';
 
-const getClientToken = createClientOnlyFn(() => localStorage.getItem('token'));
-const setClientToken = createClientOnlyFn((token: string) =>
-  localStorage.setItem('token', token),
-);
-
-const registerAndValidateToken = createServerFn({ method: 'GET', strict: true })
+const registerAndValidateUser = createServerFn({ method: 'GET', strict: true })
   .validator(
     z.object({
       token: z.string().nullish(),
+      name: z.string().max(16).nullish(),
     }),
   )
   .handler(async ({ data }) => {
-    const { token } = data;
+    let { token, name } = data;
 
-    async function createUser() {
+    if (!name) name = `Guest-${Math.floor(Math.random() * 10000)}`;
+
+    async function createUser(name: string) {
       let token = crypto.randomUUID();
-      await db.insert(UserSchema).values({ id: token });
-      return token;
+      await db.insert(UserSchema).values({ id: token, name });
+      return { token, name };
     }
 
-    if (!token) return createUser();
+    if (!token) return createUser(name);
 
     const user = (
       await db.select().from(UserSchema).where(eq(UserSchema.id, token))
     )[0];
 
-    if (!user) return createUser();
+    if (!user) return false;
 
-    return token;
+    return { token, name: user.name };
   });
 
 export const Route = createRootRoute({
@@ -64,11 +67,24 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   useEffect(() => {
-    let token = getClientToken();
+    let token = localStorage.getItem('token');
+    let name = localStorage.getItem('name')?.slice(0, 16);
 
-    registerAndValidateToken({ data: { token } }).then((token) => {
-      setClientToken(token);
+    if (!name)
+      name =
+        prompt('Enter your name: (max 16 characters)') ||
+        `Guest-${Math.floor(Math.random() * 10000)}`;
+
+    registerAndValidateUser({ data: { token, name } }).then((data) => {
+      if (!data) {
+        localStorage.clear();
+        return router.invalidate();
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('name', data.name);
     });
   }, []);
 
