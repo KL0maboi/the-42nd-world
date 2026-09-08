@@ -17,10 +17,5 @@
   "routerOnly": false,
   "version": 1,
   "framework": "react",
-  "chosenAddOns": [
-    "eslint",
-    "vercel",
-    "drizzle",
-    "shadcn"
-  ]
+  "chosenAddOns": ["eslint", "vercel", "drizzle", "shadcn"]
 }

@@ -1,22 +1,22 @@
-import { Button } from '#/components/ui/button'
-import { Input } from '#/components/ui/input'
-import { Label } from '#/components/ui/label'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Button } from '#/components/ui/button';
+import { Input } from '#/components/ui/input';
+import { Label } from '#/components/ui/label';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({ component: Home });
 
 function Home() {
-  const nav = useNavigate()
+  const nav = useNavigate();
 
   function handleText(
     e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
   ) {
-    let text = e.target.value
+    let text = e.target.value;
 
-    text = text.toUpperCase()
-    text = text.replaceAll(/[^A-Z0-9]/g, '')
+    text = text.toUpperCase();
+    text = text.replaceAll(/[^A-Z0-9]/g, '');
 
-    e.target.value = text
+    e.target.value = text;
   }
 
   return (
@@ -40,5 +40,5 @@ function Home() {
         </Button>
       </div>
     </main>
-  )
+  );
 }
