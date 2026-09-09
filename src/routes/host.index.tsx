@@ -73,7 +73,6 @@ function RouteComponent() {
   return (
     <main className="flex flex-col justify-center items-center w-screen h-screen">
       <form
-        action="submit"
         className="bg-foreground/5 p-8 rounded-md w-lg h-auto"
         onSubmit={(e) => {
           e.preventDefault();

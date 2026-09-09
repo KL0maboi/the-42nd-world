@@ -9,7 +9,7 @@ import appCss from '../styles.css?url';
 import { createServerFn } from '@tanstack/react-start';
 import z from 'zod';
 import { db } from '#/db';
-import { UserSchema } from '#/db/schema';
+import { RoomPlayerSchema, UserSchema } from '#/db/schema';
 import { eq } from 'drizzle-orm';
 import { useEffect } from 'react';
 
@@ -40,6 +40,21 @@ const registerAndValidateUser = createServerFn({ method: 'GET', strict: true })
     if (!user) return false;
 
     return { token, name: user.name };
+  });
+
+const getUserLobby = createServerFn({ method: 'GET', strict: true })
+  .validator(z.object({ token: z.string() }))
+  .handler(async ({ data }) => {
+    const { token } = data;
+
+    const user_room = (
+      await db
+        .select()
+        .from(RoomPlayerSchema)
+        .where(eq(RoomPlayerSchema.userId, token))
+    )[0];
+
+    return user_room?.roomId;
   });
 
 export const Route = createRootRoute({
@@ -80,11 +95,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     registerAndValidateUser({ data: { token, name } }).then((data) => {
       if (!data) {
         localStorage.clear();
-        return router.invalidate();
+        return location.reload();
       }
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('name', data.name);
+
+      getUserLobby({ data: { token: data.token } }).then((roomId) => {
+        if (roomId) {
+          router.navigate({ to: '/room/$id', params: { id: roomId } });
+        }
+      });
     });
   }, []);
 
